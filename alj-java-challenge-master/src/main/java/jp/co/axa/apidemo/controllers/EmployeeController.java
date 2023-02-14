@@ -27,7 +27,7 @@ public class EmployeeController {
 
     @GetMapping(value = {"/employees/", "/employees/{employeeId}",})
     public Employee getEmployee(@PathVariable(name = "employeeId") Long employeeId) {
-            return employeeService.getEmployee(employeeId);
+        return employeeService.getEmployee(employeeId);
     }
 
     @PostMapping("/employees")
