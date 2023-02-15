@@ -2,6 +2,7 @@ package jp.co.axa.apidemo.entities.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Copyright (c) AXA. All Rights Reserved
@@ -11,6 +12,7 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class EmployeeRequest {
 
     private long id;
