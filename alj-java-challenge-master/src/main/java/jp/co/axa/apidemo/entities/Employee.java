@@ -18,7 +18,7 @@ public class Employee {
     @Setter
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
     @Getter
     @Setter
@@ -28,7 +28,7 @@ public class Employee {
     @Getter
     @Setter
     @Column(name="EMPLOYEE_SALARY")
-    private Integer salary;
+    private int salary;
 
     @Getter
     @Setter
