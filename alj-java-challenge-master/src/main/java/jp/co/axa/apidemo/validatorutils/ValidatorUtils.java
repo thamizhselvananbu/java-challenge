@@ -29,14 +29,13 @@ public final class ValidatorUtils {
     }
 
     public static void validateEmployee(EmployeeRequest employeeRequest) {
-        if (!isNull(employeeRequest)) {
-            if (isNull(employeeRequest.getName()) || employeeRequest.getSalary() <= 0 || isNull(employeeRequest.getDepartment())) {
+            if (isNull(employeeRequest.getName())
+                    || employeeRequest.getSalary() <= 0
+                    || isNull(employeeRequest.getDepartment())
+            ) {
                 throw new EmployeeApiException("Invalid Employee json");
-            }
-        } else {
+            } else {
             throw new EmployeeApiException("Employee should not be null");
         }
     }
-
-
 }
