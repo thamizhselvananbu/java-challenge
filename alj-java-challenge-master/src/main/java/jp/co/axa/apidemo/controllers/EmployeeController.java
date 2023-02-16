@@ -25,9 +25,9 @@ import static jp.co.axa.apidemo.validatorutils.ValidatorUtils.validateEmployee;
 public class EmployeeController {
 
     @Autowired
-    private EmployeeService employeeService;
+    private final EmployeeService employeeService;
 
-    public void setEmployeeService(EmployeeService employeeService) {
+    public EmployeeController(EmployeeService employeeService) {
         this.employeeService = employeeService;
     }
 
@@ -58,6 +58,7 @@ public class EmployeeController {
         Employee employee = new Employee();
         try {
             validateEmployee(employeeRequest);
+
             if(employeeRequest.getId() > 0) {
                 employee.setId(employeeRequest.getId());
             } else {
