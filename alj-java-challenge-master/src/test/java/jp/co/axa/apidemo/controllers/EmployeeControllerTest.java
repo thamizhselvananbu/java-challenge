@@ -14,8 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
@@ -29,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
+@ContextConfiguration
 public class EmployeeControllerTest {
 
     private EmployeeController employeeController;
@@ -39,10 +44,14 @@ public class EmployeeControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private WebApplicationContext webApplicationContext;
+
     private EmployeeRequest employee;
 
     @Before
     public void setUp() {
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
         this.employeeController = mock(EmployeeController.class);
         employee = new EmployeeRequest();
     }
@@ -53,6 +62,7 @@ public class EmployeeControllerTest {
     }
 
     @Test
+    @WithMockUser()
     public void getEmployeesTest() throws Exception {
 
         mockMvc.perform(get("/api/v1/employees"))
@@ -61,6 +71,7 @@ public class EmployeeControllerTest {
     }
 
     @Test
+    @WithMockUser()
     public void getEmployeesByIdTest() throws Exception {
 
         mockMvc.perform(get("/api/v1/employees/1"))
@@ -73,6 +84,7 @@ public class EmployeeControllerTest {
     }
 
     @Test
+    @WithMockUser()
     public void saveEmployeesTest() throws Exception {
 
         employee = new EmployeeRequest(1, "Leif Weyand", 100000, "IT");
@@ -135,6 +147,7 @@ public class EmployeeControllerTest {
 
 
     @Test(expected = EmployeeApiException.class)
+    @WithMockUser()
     public void saveEmployeeWithInvalidIdTest() throws Exception {
 
         employee = new EmployeeRequest(-1, "Leif Weyand", 100000, "IT");
@@ -157,11 +170,11 @@ public class EmployeeControllerTest {
         assertNull(employeeService.getEmployee(id1).getDepartment());
 
     }
-
     @Test
+    @WithMockUser()
     public void deleteEmployeeTest() throws Exception {
 
-        employee = new EmployeeRequest(101, "Leif Weyandd", 100000, "IT");
+        employee = new EmployeeRequest(1, "Leif Weyand", 100000, "IT");
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -170,8 +183,8 @@ public class EmployeeControllerTest {
                         .content(objectMapper.writeValueAsString(employee)))
                 .andDo(print())
                 .andExpect(jsonPath("$.*", hasSize(4)))
-                .andExpect(jsonPath("$.id").value(101))
-                .andExpect(jsonPath("$.name").value("Leif Weyandd"))
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("Leif Weyand"))
                 .andExpect(jsonPath("$.salary").value(100000))
                 .andExpect(jsonPath("$.department").value("IT"))
                 .andExpect(status().isCreated()).andReturn().getResponse();
