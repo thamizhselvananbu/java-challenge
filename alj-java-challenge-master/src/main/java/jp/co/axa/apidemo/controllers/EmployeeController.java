@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 import static jp.co.axa.apidemo.validatorutils.ValidatorUtils.isNull;
@@ -54,15 +56,14 @@ public class EmployeeController {
      *
      */
     @PostMapping("/employees")
-    public ResponseEntity<Employee> saveEmployee(@RequestBody EmployeeRequest employeeRequest) {
+    public ResponseEntity<Employee> saveEmployee(@RequestBody @NotNull EmployeeRequest employeeRequest) {
         Employee employee = new Employee();
         try {
             validateEmployee(employeeRequest);
-
             if(employeeRequest.getId() > 0) {
                 employee.setId(employeeRequest.getId());
             } else {
-                log.info("Employee creation is failed");
+                log.info("Invalid employeeId failed employee creation");
                 throw new EmployeeApiException("EmployeeID should be greater than 0");
             }
             employee.setName(employeeRequest.getName());
@@ -73,6 +74,7 @@ public class EmployeeController {
             log.info("Employee Saved Successfully");
         } catch (EmployeeApiException e) {
             log.info(e.getMessage());
+            throw new EmployeeApiException(e.getMessage());
         } catch (Exception e) {
             log.info("Internal Error");
             throw new EmployeeApiException("Internal error");
@@ -96,9 +98,11 @@ public class EmployeeController {
             }
         } catch (EmployeeApiException e) {
             log.info("Employee deletion failed");
+            throw new EmployeeApiException(e.getMessage());
         } catch (Exception e) {
             log.debug(e.getCause());
-            log.info("Employee deletion failed");
+            log.info("Employee deletion failed due to internal error");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
         }
         log.info("Employee Deleted Successfully");
         return ResponseEntity.status(HttpStatus.OK).body("Deleted Successfully");
@@ -109,7 +113,7 @@ public class EmployeeController {
      *
      */
     @PutMapping("/employees/{employeeId}")
-    public ResponseEntity<String> updateEmployee(@RequestBody EmployeeRequest employeeRequest,
+    public ResponseEntity<String> updateEmployee(@RequestBody @NotNull EmployeeRequest employeeRequest,
                                @PathVariable(name = "employeeId") Long employeeId) {
         try {
             Employee emp = employeeService.getEmployee(employeeId);
@@ -127,9 +131,10 @@ public class EmployeeController {
             }
         } catch (EmployeeApiException e) {
             log.info("Update employee failed");
+            throw new EmployeeApiException(e.getMessage());
         } catch (Exception e) {
             log.info("Internal error");
-            throw new EmployeeApiException("Internal error");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error");
         }
         return ResponseEntity.status(HttpStatus.OK).body("Update Success");
     }
