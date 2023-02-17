@@ -11,7 +11,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 @EnableWebSecurity
 public class EmployeeApiSecurity extends WebSecurityConfigurerAdapter implements ApplicationContextAware {
 
-    // Secure the endpoints with HTTP Basic authentication
+    /* Secure the endpoints with HTTP Basic authentication */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
