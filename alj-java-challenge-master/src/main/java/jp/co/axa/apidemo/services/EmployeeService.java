@@ -4,15 +4,40 @@ import jp.co.axa.apidemo.entities.Employee;
 
 import java.util.List;
 
+/**
+ * Copyright (c) AXA. All Rights Reserved
+ * Service Interface for EmployeeAPI
+ */
 public interface EmployeeService {
 
-    public List<Employee> retrieveEmployees();
+    /**
+     * retrieve all employee list
+     * Return: List<Employee>
+     */
+    List<Employee> retrieveEmployees();
 
-    public Employee getEmployee(Long employeeId);
+    /**
+     * retrieve a employee by its id
+     * Params: employeeId
+     * Return: Employee
+     */
+    Employee getEmployee(Long employeeId);
 
-    public void saveEmployee(Employee employee);
+    /**
+     * Create new employee
+     * Params: Employee
+     */
+    void saveEmployee(Employee employee);
 
-    public void deleteEmployee(Long employeeId);
+    /**
+     * Delete a employee
+     * Params: employeeId
+     */
+    void deleteEmployee(Long employeeId);
 
-    public void updateEmployee(Employee employee);
+    /**
+     * Update a employee
+     * Params: Employee
+     */
+    void updateEmployee(Employee employee);
 }
