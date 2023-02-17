@@ -1,16 +1,9 @@
 package jp.co.axa.apidemo.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 
 @Entity
@@ -28,16 +21,21 @@ public class Employee implements Serializable {
     @Getter
     @Setter
     @Column(name="EMPLOYEE_NAME")
+    @NonNull
+    @NotEmpty
     private String name;
 
     @Getter
     @Setter
     @Column(name="EMPLOYEE_SALARY")
+    @NonNull
     private int salary;
 
     @Getter
     @Setter
     @Column(name="DEPARTMENT")
+    @NonNull
+    @NotEmpty
     private String department;
 
 }
