@@ -14,7 +14,6 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
-import static jp.co.axa.apidemo.validatorutils.ValidatorUtils.isNull;
 import static jp.co.axa.apidemo.validatorutils.ValidatorUtils.validateEmployee;
 
 /**
@@ -35,7 +34,6 @@ public class EmployeeController {
 
     /**
      * Retrieve all employees
-     *
      */
     @GetMapping("/employees")
     public List<Employee> getEmployees() {
@@ -44,7 +42,8 @@ public class EmployeeController {
 
     /**
      * Retrieve employee by employeeId
-     *
+     * Added /employees/ into PATH values to differentiate
+     * GET /employees full list and /employees by ID
      */
     @GetMapping(value = {"/employees/", "/employees/{employeeId}",})
     public Employee getEmployee(@PathVariable(name = "employeeId") Long employeeId) {
@@ -53,55 +52,76 @@ public class EmployeeController {
 
     /**
      * Create new employee
-     *
      */
     @PostMapping("/employees")
     public ResponseEntity<Employee> saveEmployee(@RequestBody @NotNull EmployeeRequest employeeRequest) {
         Employee employee = new Employee();
         try {
+            /**
+             * validating employeeRequest object sent from request body
+             */
             validateEmployee(employeeRequest);
-            if(employeeRequest.getId() > 0) {
-                employee.setId(employeeRequest.getId());
-            } else {
-                log.info("Invalid employeeId failed employee creation");
-                throw new EmployeeApiException("EmployeeID should be greater than 0");
-            }
+
+            /**
+             * Mapping employeeRequest to employee Entity
+             * Persistent entities should not be used as arguments of @RequestMapping
+             */
             employee.setName(employeeRequest.getName());
             employee.setSalary(employeeRequest.getSalary());
             employee.setDepartment(employeeRequest.getDepartment());
 
+            /**
+             * After Successful validation and mapping save the employee
+             */
             employeeService.saveEmployee(employee);
-            log.info("Employee Saved Successfully");
         } catch (EmployeeApiException e) {
+            /**
+             * Catch Employee API exceptions thrown during validations
+             */
             log.info(e.getMessage());
             throw new EmployeeApiException(e.getMessage());
         } catch (Exception e) {
-            log.info("Internal Error");
+            /**
+             * Catch Unexpected API exceptions and throw custom API Exception
+             */
+            log.debug(e.getCause());
             throw new EmployeeApiException("Internal error");
         }
 
-       return ResponseEntity.status(HttpStatus.CREATED).body(employee);
+        log.info("Employee Saved Successfully");
 
+        return ResponseEntity.status(HttpStatus.CREATED).body(employee);
     }
 
     /**
      * Delete a employee by employeeId
-     *
-     * @return
      */
     @DeleteMapping("/employees/{employeeId}")
     public ResponseEntity<String> deleteEmployee(@PathVariable(name = "employeeId") Long employeeId) {
         try {
-            Employee emp = employeeService.getEmployee(employeeId);
-            if (!isNull(emp)) {
-                employeeService.deleteEmployee(employeeId);
-            }
+            /**
+             * To delete employee first check that employee
+             *  already exists by retrieve employee
+             *  if not exists it will throw custom API exception
+             */
+            employeeService.getEmployee(employeeId);
+
+            /**
+             * To delete employee by employeeId
+             */
+            employeeService.deleteEmployee(employeeId);
         } catch (EmployeeApiException e) {
+            /**
+             * Catch Employee API exception if employee
+             * user want to delete not exists
+             */
             log.info("Employee deletion failed");
             throw new EmployeeApiException(e.getMessage());
         } catch (Exception e) {
+            /**
+             * Catch Unexpected API exception
+             */
             log.debug(e.getCause());
-            log.info("Employee deletion failed due to internal error");
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
         }
         log.info("Employee Deleted Successfully");
@@ -110,33 +130,46 @@ public class EmployeeController {
 
     /**
      * Update a employee by employeeId
-     *
      */
     @PutMapping("/employees/{employeeId}")
     public ResponseEntity<String> updateEmployee(@RequestBody @NotNull EmployeeRequest employeeRequest,
-                               @PathVariable(name = "employeeId") Long employeeId) {
+                                                 @PathVariable(name = "employeeId") Long employeeId) {
         try {
+            /**
+             * Check that the employee user wants to
+             *  update is exis or not
+             *  if not exists Employee API exception will
+             *  thrown from service layer
+             */
             Employee emp = employeeService.getEmployee(employeeId);
-            if (emp != null) {
-                validateEmployee(employeeRequest);
-                if(employeeRequest.getId() > 0) {
-                    emp.setId(employeeRequest.getId());
-                } else {
-                    log.info("Updating employee is failed");
-                    throw new EmployeeApiException("EmployeeID should be greater than 0");
-                }
-                emp.setName(employeeRequest.getName());
-                emp.setSalary(employeeRequest.getSalary());
-                emp.setDepartment(employeeRequest.getDepartment());
-            }
+            /**
+             * Validate employeeRequest sent from requestbody
+             */
+            validateEmployee(employeeRequest);
+            /**
+             * Mapping employeeRequest to employee Entity
+             * Persistent entities should not be used as arguments of @RequestMapping
+             */
+            emp.setName(employeeRequest.getName());
+            emp.setSalary(employeeRequest.getSalary());
+            emp.setDepartment(employeeRequest.getDepartment());
+            /**
+             * Update employee
+             */
+            employeeService.updateEmployee(emp);
         } catch (EmployeeApiException e) {
+            /**
+             * Catch Employee API exceptions thrown during validations
+             */
             log.info("Update employee failed");
             throw new EmployeeApiException(e.getMessage());
         } catch (Exception e) {
-            log.info("Internal error");
+            /**
+             * Catch Unexpected API exception
+             */
+            log.debug(e.getCause());
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error");
         }
         return ResponseEntity.status(HttpStatus.OK).body("Update Success");
     }
-
 }
