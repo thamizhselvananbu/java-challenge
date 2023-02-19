@@ -39,8 +39,6 @@ public final class ValidatorUtils {
                 || employeeRequest.getSalary() <= 0
                 || isNull(employeeRequest.getDepartment())) {
             throw new EmployeeApiException("Invalid Employee json");
-        } else {
-            throw new EmployeeApiException("Employee should not be null");
         }
     }
 }

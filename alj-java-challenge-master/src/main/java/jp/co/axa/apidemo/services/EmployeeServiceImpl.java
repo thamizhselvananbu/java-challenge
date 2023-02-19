@@ -6,10 +6,12 @@ import jp.co.axa.apidemo.repositories.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import springfox.documentation.annotations.Cacheable;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
@@ -22,16 +24,18 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Cacheable(value="employee")
+    @CacheEvict(allEntries = true, cacheNames = "employee")
+    @Scheduled(fixedDelay=30000)
     public List<Employee> retrieveEmployees() {
         return employeeRepository.findAll();
     }
 
     @Cacheable(value="employee")
+    @CacheEvict(allEntries = true, cacheNames = "employee")
+    @Scheduled(fixedDelay=30000)
     public Employee getEmployee(Long employeeId) {
-        return  employeeRepository
-                .findById(employeeId)
-                .orElseThrow(() -> new EmployeeApiException("Employee Id is not exist"));
-
+        Optional<Employee> employee = employeeRepository.findById(employeeId);
+        return employee.orElse(null);
     }
 
     public void saveEmployee(Employee employee) {
@@ -44,6 +48,8 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @CachePut(value="employee")
+    @CacheEvict(allEntries = true, cacheNames = "employee")
+    @Scheduled(fixedDelay=30000)
     public void updateEmployee(Employee employee) {
         employeeRepository.save(employee);
     }
