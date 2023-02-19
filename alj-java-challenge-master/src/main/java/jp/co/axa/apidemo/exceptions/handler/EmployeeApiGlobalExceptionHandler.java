@@ -9,8 +9,10 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import javax.xml.ws.Response;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -29,6 +31,11 @@ public class EmployeeApiGlobalExceptionHandler extends ResponseEntityExceptionHa
     @ExceptionHandler(value = {EmployeeApiException.class})
     public EmployeeApiException handleEmployeeApiExceptions(EmployeeApiException apiException, WebRequest request) {
         return apiException;
+    }
+
+    @ExceptionHandler(value = {ResponseStatusException.class})
+    public ResponseStatusException handleEmployeeApiExceptionStatus(ResponseStatusException apiException, WebRequest request) {
+        return new ResponseStatusException(apiException.getStatus(), apiException.getMessage());
     }
 
     @ExceptionHandler(value = {Exception.class})
