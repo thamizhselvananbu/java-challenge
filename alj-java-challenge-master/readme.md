@@ -19,6 +19,7 @@ Application (with the embedded H2 database) is ready to be used ! You can access
 
 #### what I would have done if I had more time
 - Securing endpoints using better authentication and authorization techniques like JWT based
+- Add more test cases using Junit5 and ensure application has more than 95% code coverage
 - Adding endpoints for end user to add bulk employees, delete bulk employees and also PATCH endpoints if needed to replace PUT
 - Replacing H2 database with MySQL database or other RDBMS database
 - Containerization of application and run backend databases using docker
