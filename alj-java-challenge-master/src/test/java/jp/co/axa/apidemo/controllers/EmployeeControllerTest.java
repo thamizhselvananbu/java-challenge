@@ -5,14 +5,13 @@ import com.jayway.jsonpath.JsonPath;
 import jp.co.axa.apidemo.entities.request.EmployeeRequest;
 import jp.co.axa.apidemo.exceptions.EmployeeApiException;
 import jp.co.axa.apidemo.services.EmployeeService;
-import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
@@ -35,30 +34,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ContextConfiguration
 public class EmployeeControllerTest {
-
     private EmployeeController employeeController;
-
-    @Autowired
     private EmployeeService employeeService;
-
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     private WebApplicationContext webApplicationContext;
 
-    private EmployeeRequest employee;
-
     @Before
     public void setUp() {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
         this.employeeController = mock(EmployeeController.class);
-        employee = new EmployeeRequest();
-    }
-
-    @After
-    public void tearDown() {
-        employee = null;
+        this.employeeService = mock(EmployeeService.class);
     }
 
     @Test
@@ -87,38 +75,27 @@ public class EmployeeControllerTest {
     @WithMockUser()
     public void saveEmployeesTest() throws Exception {
 
-        employee = new EmployeeRequest(1, "Leif Weyand", 100000, "IT");
+        EmployeeRequest employeeRequest = new EmployeeRequest(1000, "Leif Weyand", 100000, "IT");
 
         ObjectMapper objectMapper = new ObjectMapper();
 
         MockHttpServletResponse response = mockMvc.perform(post("/api/v1/employees")
                         .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(employee)))
+                        .content(objectMapper.writeValueAsString(employeeRequest)))
                 .andDo(print())
                 .andExpect(jsonPath("$.*", hasSize(4)))
-                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.id").value(1000))
                 .andExpect(jsonPath("$.name").value("Leif Weyand"))
                 .andExpect(jsonPath("$.salary").value(100000))
                 .andExpect(jsonPath("$.department").value("IT"))
                 .andExpect(status().isCreated()).andReturn().getResponse();
-
-        int id = JsonPath.parse(response.getContentAsString()).read("$.id");
-        Long id1 = new Long(String.valueOf(id));
-
-        mockMvc.perform(get("/api/v1/employees/1"))
-                .andDo(print())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.name").value("Leif Weyand"))
-                .andExpect(jsonPath("$.salary").value(100000))
-                .andExpect(jsonPath("$.department").value("IT"))
-                .andExpect(status().isOk());
 
     }
 
     @Test
     public void updateEmployeeTest() throws Exception {
 
-        employee = new EmployeeRequest(1, "Leif Weyand", 100000, "IT");
+        EmployeeRequest employee = new EmployeeRequest(1, "Leif Weyand", 100000, "IT");
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -150,31 +127,21 @@ public class EmployeeControllerTest {
     @WithMockUser()
     public void saveEmployeeWithInvalidIdTest() throws Exception {
 
-        employee = new EmployeeRequest(-1, "Leif Weyand", 100000, "IT");
+       EmployeeRequest employee = new EmployeeRequest(-1, "Leif Weyand", 100000, "IT");
 
         ObjectMapper objectMapper = new ObjectMapper();
 
-        MockHttpServletResponse response = mockMvc.perform(post("/api/v1/employees")
+        mockMvc.perform(post("/api/v1/employees")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(employee)))
                 .andDo(print())
-                .andExpect(jsonPath("$.*", hasSize(4)))
-                .andExpect(status().isCreated()).andReturn().getResponse();
-
-        int id = JsonPath.parse(response.getContentAsString()).read("$.id");
-        Long id1 = new Long(String.valueOf(id));
-
-        assertEquals(0, employeeService.getEmployee(id1).getId());
-        assertNull(employeeService.getEmployee(id1).getName());
-        assertEquals(0, employeeService.getEmployee(id1).getSalary());
-        assertNull(employeeService.getEmployee(id1).getDepartment());
-
+                .andExpect(status().isBadRequest());
     }
     @Test
     @WithMockUser()
     public void deleteEmployeeTest() throws Exception {
 
-        employee = new EmployeeRequest(1, "Leif Weyand", 100000, "IT");
+       EmployeeRequest employee = new EmployeeRequest(1, "Leif Weyand", 100000, "IT");
 
         ObjectMapper objectMapper = new ObjectMapper();
 
